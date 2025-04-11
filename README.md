@@ -160,6 +160,6 @@ Push to branch (git push origin feature/new-feature).
 Open a Pull Request.
 
 
-### Email: arshtiwari12345@gmail.com
 
-Made with ❤ by Team Synapse
+
+<div align="center"> <h3>🚀 Built with ❤ by Team Synapse 🚀</h3> <p>Contact: <a href="mailto:arshtiwari12345@gmail.com">arshtiwari12345@gmail.com</a></p> </div> 

@@ -36,6 +36,16 @@ Save project history (for registered users).
 5. Dynamic Pricing
 Fetches real-time material costs from APIs.
 
+## 🛠️ Tech Stack
+| Layer | Technology | Purpose |
+|-------|------------|---------|
+| **Frontend** | React 18, Vite, TypeScript | Core application framework |
+| **Styling** | TailwindCSS, Framer Motion | Responsive design & animations |
+| **Backend** | Node.js, Express, Firebase Functions | API services & business logic |
+| **Database** | Firestore (Primary), MongoDB Atlas (Analytics) | Data persistence |
+| **AI/ML** | Python, scikit-learn, TensorFlow.js | Cost prediction models |
+| **DevOps** | GitHub Actions, Docker | CI/CD Pipeline |
+| **Monitoring** | Sentry, Prometheus | Error tracking & metrics |
 
 ## 🤖 AI Models
 

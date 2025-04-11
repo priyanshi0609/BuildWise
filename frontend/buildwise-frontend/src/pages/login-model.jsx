@@ -1,32 +1,32 @@
-import { useState, useEffect } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { X, Mail, Lock, Eye, EyeOff } from "lucide-react"
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { X, Mail, Lock, Eye, EyeOff } from "lucide-react";
+import { signInWithPopup } from "firebase/auth";
+import { auth, provider } from '/src/firebase.js';
+
 
 export default function LoginModal({ isOpen, onClose, onOpenSignup }) {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [showPassword, setShowPassword] = useState(false)
-  const [rememberMe, setRememberMe] = useState(false)
-  
-  // Prevent body scrolling when modal is open
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = "unset";
     }
     return () => {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = "unset";
     };
   }, [isOpen]);
 
   const handleSubmit = (e) => {
-    e.preventDefault()
-    // Handle login logic here
-    console.log("Login attempt with:", { email, password, rememberMe })
-    // For demo purposes, just close the modal
-    onClose()
-  }
+    e.preventDefault();
+    console.log("Login attempt with:", { email, password, rememberMe });
+    onClose();
+  };
 
   const switchToSignup = () => {
     onClose();
@@ -35,12 +35,25 @@ export default function LoginModal({ isOpen, onClose, onOpenSignup }) {
     }
   };
 
+  const handleGoogleSignIn = async () => {
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      console.log("Google User:", user);
+      alert(`Welcome ${user.displayName}`);
+      onClose();
+    } catch (error) {
+      console.error("Google Sign-In Error:", error);
+      alert("Google Sign-In failed. Please try again.");
+    }
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
-        <div 
+        <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-          style={{ alignItems: 'flex-start', paddingTop: '5vh' }}
+          style={{ alignItems: "flex-start", paddingTop: "5vh" }}
         >
           <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -50,8 +63,8 @@ export default function LoginModal({ isOpen, onClose, onOpenSignup }) {
             className="relative bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden"
           >
             <div className="sticky top-0 right-0 flex justify-end p-4 bg-white">
-              <button 
-                onClick={onClose} 
+              <button
+                onClick={onClose}
                 className="p-1 rounded-full hover:bg-gray-100 transition-colors"
                 aria-label="Close modal"
               >
@@ -64,12 +77,17 @@ export default function LoginModal({ isOpen, onClose, onOpenSignup }) {
                 <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
                   Welcome Back
                 </h2>
-                <p className="text-gray-600 mt-1">Sign in to your BuildWise account</p>
+                <p className="text-gray-600 mt-1">
+                  Sign in to your BuildWise account
+                </p>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <label htmlFor="email" className="text-sm font-medium text-gray-700">
+                  <label
+                    htmlFor="email"
+                    className="text-sm font-medium text-gray-700"
+                  >
                     Email
                   </label>
                   <div className="relative">
@@ -89,7 +107,10 @@ export default function LoginModal({ isOpen, onClose, onOpenSignup }) {
                 </div>
 
                 <div className="space-y-2">
-                  <label htmlFor="password" className="text-sm font-medium text-gray-700">
+                  <label
+                    htmlFor="password"
+                    className="text-sm font-medium text-gray-700"
+                  >
                     Password
                   </label>
                   <div className="relative">
@@ -127,7 +148,10 @@ export default function LoginModal({ isOpen, onClose, onOpenSignup }) {
                       onChange={() => setRememberMe(!rememberMe)}
                       className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
-                    <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
+                    <label
+                      htmlFor="remember-me"
+                      className="ml-2 block text-sm text-gray-700"
+                    >
                       Remember me
                     </label>
                   </div>
@@ -156,10 +180,28 @@ export default function LoginModal({ isOpen, onClose, onOpenSignup }) {
                   </button>
                 </div>
               </form>
+
+              <div className="relative text-center mt-6">
+                <p className="text-sm text-gray-500 mb-2">or</p>
+                <button
+                  type="button"
+                  onClick={handleGoogleSignIn}
+                  className="w-full py-2 px-4 flex items-center justify-center gap-2 bg-white border border-gray-300 rounded-lg shadow-sm hover:shadow-md transition-all"
+                >
+                  <img
+                    src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+                    alt="Google"
+                    className="w-5 h-5"
+                  />
+                  <span className="text-sm font-medium text-gray-700">
+                    Sign in with Google
+                  </span>
+                </button>
+              </div>
             </div>
           </motion.div>
         </div>
       )}
     </AnimatePresence>
-  )
+  );
 }

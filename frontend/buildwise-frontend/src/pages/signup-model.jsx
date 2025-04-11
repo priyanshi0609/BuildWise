@@ -1,48 +1,88 @@
-import { useState, useEffect } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { X, Mail, Lock, User, Eye, EyeOff } from "lucide-react"
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { X, Mail, Lock, User, Eye, EyeOff } from "lucide-react";
+import { createUserWithEmailAndPassword, signInWithPopup } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
+import { auth, provider, db } from "/src/firebase.js";
 
 export default function SignupModal({ isOpen, onClose, onOpenLogin }) {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
-  const [name, setName] = useState("")
-  const [confirmPassword, setConfirmPassword] = useState("")
-  const [showPassword, setShowPassword] = useState(false)
-  const [agreeTerms, setAgreeTerms] = useState(false)
-  
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [agreeTerms, setAgreeTerms] = useState(false);
+
   // Prevent body scrolling when modal is open
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
+    document.body.style.overflow = isOpen ? "hidden" : "unset";
     return () => {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = "unset";
     };
   }, [isOpen]);
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    // Handle signup logic here
-    console.log("Signup attempt with:", { name, email, password, agreeTerms })
-    // For demo purposes, just close the modal
-    onClose()
-  }
-  
+  const storeUserInFirestore = async (user, method) => {
+    try {
+      const userRef = doc(db, "users", user.uid);
+      await setDoc(
+        userRef,
+        {
+          uid: user.uid,
+          name: user.displayName || name,
+          email: user.email,
+          signupMethod: method,
+          timestamp: new Date(),
+        },
+        { merge: true }
+      );
+    } catch (err) {
+      console.error("Error storing user in Firestore:", err);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    // Simple check for passwords match
+    if (password !== confirmPassword) {
+      alert("Passwords do not match!");
+      return;
+    }
+
+    try {
+      const result = await createUserWithEmailAndPassword(auth, email, password);
+      await storeUserInFirestore(result.user, "email");
+      alert(`Account created for ${result.user.email}`);
+      onClose();
+    } catch (error) {
+      console.error("Sign-Up Error:", error.message);
+      alert("Sign-Up failed: " + error.message);
+    }
+  };
+
+  const handleGoogleSignUp = async () => {
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      await storeUserInFirestore(user, "google");
+      alert(`Welcome ${user.displayName}`);
+      onClose();
+    } catch (error) {
+      console.error("Google Sign-Up Error:", error);
+      alert("Google Sign-Up failed. Please try again.");
+    }
+  };
+
   const switchToLogin = () => {
     onClose();
-    if (onOpenLogin) {
-      onOpenLogin();
-    }
+    if (onOpenLogin) onOpenLogin();
   };
 
   return (
     <AnimatePresence>
       {isOpen && (
-        <div 
+        <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-          style={{ alignItems: 'flex-start', paddingTop: '5vh' }}
+          style={{ alignItems: "flex-start", paddingTop: "5vh" }}
         >
           <motion.div
             initial={{ opacity: 0, y: -20 }}
@@ -52,8 +92,8 @@ export default function SignupModal({ isOpen, onClose, onOpenLogin }) {
             className="relative bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden"
           >
             <div className="sticky top-0 right-0 flex justify-end p-4 bg-white">
-              <button 
-                onClick={onClose} 
+              <button
+                onClick={onClose}
                 className="p-1 rounded-full hover:bg-gray-100 transition-colors"
                 aria-label="Close modal"
               >
@@ -66,7 +106,9 @@ export default function SignupModal({ isOpen, onClose, onOpenLogin }) {
                 <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
                   Create an Account
                 </h2>
-                <p className="text-gray-600 mt-1">Join BuildWise and start building smarter</p>
+                <p className="text-gray-600 mt-1">
+                  Join BuildWise and start building smarter
+                </p>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -199,10 +241,29 @@ export default function SignupModal({ isOpen, onClose, onOpenLogin }) {
                   </button>
                 </div>
               </form>
+
+              {/* Google Sign-Up Option */}
+              <div className="relative text-center mt-6">
+                <p className="text-sm text-gray-500 mb-2">or</p>
+                <button
+                  type="button"
+                  onClick={handleGoogleSignUp}
+                  className="w-full py-2 px-4 flex items-center justify-center gap-2 bg-white border border-gray-300 rounded-lg shadow-sm hover:shadow-md transition-all"
+                >
+                  <img
+                    src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+                    alt="Google"
+                    className="w-5 h-5"
+                  />
+                  <span className="text-sm font-medium text-gray-700">
+                    Sign up with Google
+                  </span>
+                </button>
+              </div>
             </div>
           </motion.div>
         </div>
       )}
     </AnimatePresence>
-  )
+  );
 }

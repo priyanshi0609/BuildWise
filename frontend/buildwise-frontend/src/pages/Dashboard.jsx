@@ -11,35 +11,35 @@ import {
   DollarSign,
   ArrowRight
 } from 'lucide-react';
-import ProjectCard from '@/components/Dashboard/ProjectCard';
-import CostBreakdownChart from '@/components/Dashboard/CostBreakdownChart';
-import RecentActivity from '@/components/Dashboard/RecentActivity';
-import { useAuth } from '@/context/AuthContext';
-import { getProjects } from '@/services/api';
+import ProjectCard from '../components/dashboard/ProjectCard';
+import CostBreakdownChart from '../components/dashboard/CostBreakdownChart';
+import RecentActivity from '../components/dashboard/RecentActivity';
+//import { useAuth } from '@/context/AuthContext';
+import { getProjects } from '../services/api';
 
 export default function Dashboard() {
   const [projects, setProjects] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('projects');
-  const { currentUser } = useAuth();
+ // const { currentUser } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const userProjects = await getProjects(currentUser.uid);
-        setProjects(userProjects);
-      } catch (error) {
-        console.error('Error fetching projects:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+//   useEffect(() => {
+//     const fetchProjects = async () => {
+//       try {
+//         const userProjects = await getProjects(currentUser.uid);
+//         setProjects(userProjects);
+//       } catch (error) {
+//         console.error('Error fetching projects:', error);
+//       } finally {
+//         setIsLoading(false);
+//       }
+//     };
 
-    if (currentUser) {
-      fetchProjects();
-    }
-  }, [currentUser]);
+//     if (currentUser) {
+//       fetchProjects();
+//     }
+//   }, [currentUser]);
 
   const containerVariants = {
     hidden: { opacity: 0 },

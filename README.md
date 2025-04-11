@@ -37,8 +37,38 @@ Save project history (for registered users).
 Fetches real-time material costs from APIs.
 
 
+## 🤖 AI Models
+
+1. Cost Prediction Model
+Predicts realistic budget overruns.
+
+Input: Project size, materials, location.
+
+Output: Estimated total cost ± accuracy margin.
+
+2. Material Optimization Model
+Suggests cheaper & durable alternatives.
+
+Rule-based + ML (e.g., "Precast concrete > Cast-in-situ").
+
+3. Labor Estimation Model
+Estimates labor hours based on project complexity.
 
 
+## 🚀 Innovation Points
+🔥 Dynamic Pricing – Real-time material cost updates.
+📊 AI-Powered Suggestions – Not just cheaper, but durable alternatives.
+📉 Predictive Budgeting – Warns about potential overruns.
+
+
+## 🌐 API Reference
+
+| Endpoint            | Method | Description                  |
+|---------------------|--------|------------------------------|
+| `/api/estimate`     | POST   | Calculate project cost       |
+| `/api/optimize`     | POST   | Get cost-saving suggestions  |
+| `/api/report`       | POST   | Generate PDF report          |
+| `/api/auth/login`   | POST   | User login                   |
 
 
 ## Folder Structure:
@@ -114,3 +144,22 @@ BuildWise/
 └── README.md                       # Project overview
 ```
 
+
+
+
+
+## 🤝 Contributing
+Fork the repo.
+
+Create a new branch (git checkout -b feature/new-feature).
+
+Commit changes (git commit -m "Add new feature").
+
+Push to branch (git push origin feature/new-feature).
+
+Open a Pull Request.
+
+
+### Email: arshtiwari12345@gmail.com
+
+Made with ❤ by Team Synapse

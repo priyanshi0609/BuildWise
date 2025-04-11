@@ -10,9 +10,19 @@ export default function RecentActivity({ userId }) {
     const fetchActivities = async () => {
       try {
         const data = await getRecentActivity(userId);
-        setActivities(data);
+        console.log('Fetched activity data:', data); // Debugging line
+
+        // Check if the response is an array or has an "activities" array
+        if (Array.isArray(data)) {
+          setActivities(data);
+        } else if (Array.isArray(data?.activities)) {
+          setActivities(data.activities);
+        } else {
+          setActivities([]); // fallback to empty array
+        }
       } catch (error) {
         console.error('Error fetching activities:', error);
+        setActivities([]); // fallback to empty array on error
       } finally {
         setIsLoading(false);
       }
@@ -42,7 +52,7 @@ export default function RecentActivity({ userId }) {
     <div className="flow-root">
       <ul className="-mb-8">
         {activities.map((activity, index) => (
-          <li key={activity.id}>
+          <li key={activity.id || index}>
             <div className="relative pb-8">
               {index !== activities.length - 1 && (
                 <span className="absolute left-4 top-4 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true"></span>

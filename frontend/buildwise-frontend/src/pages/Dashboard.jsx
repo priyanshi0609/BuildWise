@@ -14,32 +14,39 @@ import {
 import ProjectCard from '../components/dashboard/ProjectCard';
 import CostBreakdownChart from '../components/dashboard/CostBreakdownChart';
 import RecentActivity from '../components/dashboard/RecentActivity';
-//import { useAuth } from '@/context/AuthContext';
+import { useAuth } from '../Authcontext';
 import { getProjects } from '../services/api';
 
 export default function Dashboard() {
   const [projects, setProjects] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('projects');
- // const { currentUser } = useAuth();
+  const { currentUser, logout } = useAuth() || {};
   const navigate = useNavigate();
 
-//   useEffect(() => {
-//     const fetchProjects = async () => {
-//       try {
-//         const userProjects = await getProjects(currentUser.uid);
-//         setProjects(userProjects);
-//       } catch (error) {
-//         console.error('Error fetching projects:', error);
-//       } finally {
-//         setIsLoading(false);
-//       }
-//     };
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        
+        if (currentUser?.uid) {
+          const userProjects = await getProjects(currentUser.uid);
+          // Ensure we always set an array
+          setProjects(Array.isArray(userProjects) ? userProjects : []);
+        }
+      } catch (err) {
+        console.error('Error fetching projects:', err);
+        setError(err.message || 'Failed to load projects');
+        setProjects([]); // Reset to empty array on error
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-//     if (currentUser) {
-//       fetchProjects();
-//     }
-//   }, [currentUser]);
+    fetchProjects();
+  }, [currentUser]);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -64,10 +71,52 @@ export default function Dashboard() {
     }
   };
 
+  if (!currentUser) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold mb-4">Authentication Required</h2>
+          <p className="mb-4">Please log in to access the dashboard</p>
+          <button 
+            onClick={() => navigate('/login')}
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+          >
+            Go to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="text-center p-6 bg-red-50 rounded-lg max-w-md">
+          <h2 className="text-xl font-semibold text-red-600 mb-4">Error Loading Dashboard</h2>
+          <p className="mb-4">{error}</p>
+          <div className="flex justify-center gap-4">
+            <button 
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+            >
+              Try Again
+            </button>
+            <button 
+              onClick={logout}
+              className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
+            >
+              Logout
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -105,7 +154,12 @@ export default function Dashboard() {
           <div className="flex justify-between items-center">
             <div>
               <h2 className="text-2xl font-bold mb-2">Welcome back, {currentUser.displayName || 'User'}!</h2>
-              <p className="opacity-90">You have {projects.length} active project{projects.length !== 1 ? 's' : ''}</p>
+              <p className="opacity-90">
+                {projects.length === 0 
+                  ? "You don't have any projects yet" 
+                  : `You have ${projects.length} active project${projects.length !== 1 ? 's' : ''}`
+                }
+              </p>
             </div>
             <button 
               className="bg-white text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg flex items-center font-medium shadow-sm transition-all hover:shadow focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50"
@@ -149,14 +203,31 @@ export default function Dashboard() {
             animate="visible"
             className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
           >
-            {projects.map((project) => (
-              <motion.div key={project.id} variants={itemVariants}>
-                <ProjectCard 
-                  project={project}
-                  onClick={() => navigate(`/projects/${project.id}`)}
-                />
-              </motion.div>
-            ))}
+            {projects.length > 0 ? (
+              projects.map((project) => (
+                <motion.div key={project.id || Math.random()} variants={itemVariants}>
+                  <ProjectCard 
+                    project={project}
+                    onClick={() => navigate(`/projects/${project.id}`)}
+                  />
+                </motion.div>
+              ))
+            ) : (
+              <div className="col-span-full text-center py-12">
+                <div className="bg-white p-8 rounded-lg shadow-sm max-w-md mx-auto">
+                  <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No projects yet</h3>
+                  <p className="text-gray-500 mb-6">Get started by creating your first project</p>
+                  <button
+                    onClick={() => navigate('/estimate/new')}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center mx-auto"
+                  >
+                    <PlusCircle className="h-5 w-5 mr-2" />
+                    Create Project
+                  </button>
+                </div>
+              </div>
+            )}
           </motion.div>
         )}
 
@@ -167,7 +238,13 @@ export default function Dashboard() {
                 <BarChart2 className="h-5 w-5 text-blue-600 mr-2" />
                 Cost Breakdown
               </h3>
-              <CostBreakdownChart projects={projects} />
+              {projects.length > 0 ? (
+                <CostBreakdownChart projects={projects} />
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  No data available. Create projects to see analytics.
+                </div>
+              )}
             </div>
             <div className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
               <h3 className="text-lg font-medium mb-4 flex items-center">
@@ -185,30 +262,36 @@ export default function Dashboard() {
               <FileText className="h-5 w-5 text-blue-600 mr-2" />
               Generated Reports
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {projects.filter(p => p.reportGenerated).map(project => (
-                <div key={project.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow bg-white hover:bg-gray-50">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h4 className="font-medium">{project.name}</h4>
-                      <p className="text-sm text-gray-500 mt-1">
-                        {new Date(project.updatedAt).toLocaleDateString()}
-                      </p>
+            {projects.filter(p => p.reportGenerated).length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {projects.filter(p => p.reportGenerated).map(project => (
+                  <div key={project.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow bg-white hover:bg-gray-50">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h4 className="font-medium">{project.name}</h4>
+                        <p className="text-sm text-gray-500 mt-1">
+                          {project.updatedAt ? new Date(project.updatedAt).toLocaleDateString() : 'No date available'}
+                        </p>
+                      </div>
+                      <button 
+                        className="text-blue-600 hover:text-blue-800 text-sm font-medium px-2 py-1 rounded flex items-center transition-colors"
+                        onClick={() => navigate(`/reports/${project.id}`)}
+                      >
+                        View <ArrowRight className="h-4 w-4 ml-1" />
+                      </button>
                     </div>
-                    <button 
-                      className="text-blue-600 hover:text-blue-800 text-sm font-medium px-2 py-1 rounded flex items-center transition-colors"
-                      onClick={() => navigate(`/reports/${project.id}`)}
-                    >
-                      View <ArrowRight className="h-4 w-4 ml-1" />
-                    </button>
+                    <div className="mt-3 flex items-center text-sm">
+                      <DollarSign className="h-4 w-4 text-green-500 mr-1" />
+                      <span>Estimated: ${project.totalCost?.toLocaleString() || '0'}</span>
+                    </div>
                   </div>
-                  <div className="mt-3 flex items-center text-sm">
-                    <DollarSign className="h-4 w-4 text-green-500 mr-1" />
-                    <span>Estimated: ${project.totalCost.toLocaleString()}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                No reports generated yet. Create projects and generate reports to view them here.
+              </div>
+            )}
           </div>
         )}
       </main>

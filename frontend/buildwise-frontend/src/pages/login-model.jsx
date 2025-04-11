@@ -1,12 +1,24 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { X, Mail, Lock, Eye, EyeOff } from "lucide-react"
 
-export default function LoginModal({ isOpen, onClose }) {
+export default function LoginModal({ isOpen, onClose, onOpenSignup }) {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [rememberMe, setRememberMe] = useState(false)
+  
+  // Prevent body scrolling when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -16,24 +28,38 @@ export default function LoginModal({ isOpen, onClose }) {
     onClose()
   }
 
+  const switchToSignup = () => {
+    onClose();
+    if (onOpenSignup) {
+      onOpenSignup();
+    }
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 overflow-y-auto">
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          style={{ alignItems: 'flex-start', paddingTop: '5vh' }}
+        >
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.2 }}
-            className="relative w-full max-w-md max-h-[90vh] bg-white rounded-xl shadow-2xl overflow-auto my-8"
+            className="relative bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden"
           >
-            <div className="absolute top-4 right-4">
-              <button onClick={onClose} className="p-1 rounded-full hover:bg-gray-100 transition-colors">
+            <div className="sticky top-0 right-0 flex justify-end p-4 bg-white">
+              <button 
+                onClick={onClose} 
+                className="p-1 rounded-full hover:bg-gray-100 transition-colors"
+                aria-label="Close modal"
+              >
                 <X size={20} className="text-gray-500" />
               </button>
             </div>
 
-            <div className="p-8">
+            <div className="px-8 pb-8 pt-2">
               <div className="text-center mb-6">
                 <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600">
                   Welcome Back
@@ -84,6 +110,7 @@ export default function LoginModal({ isOpen, onClose }) {
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
                         className="text-gray-400 hover:text-gray-600 focus:outline-none"
+                        aria-label={showPassword ? "Hide password" : "Show password"}
                       >
                         {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                       </button>
@@ -122,11 +149,7 @@ export default function LoginModal({ isOpen, onClose }) {
                   Don't have an account?{" "}
                   <button
                     type="button"
-                    onClick={() => {
-                      onClose()
-                      // You would typically open the signup modal here
-                      // For this example, we'll just close the login modal
-                    }}
+                    onClick={switchToSignup}
                     className="text-blue-600 hover:text-blue-800 font-medium"
                   >
                     Sign up

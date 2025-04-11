@@ -9,8 +9,18 @@ export default function Navbar() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
   const [isSignupModalOpen, setIsSignupModalOpen] = useState(false)
 
+  const openLoginModal = () => {
+    setIsLoginModalOpen(true)
+    setIsSignupModalOpen(false)
+  }
+
+  const openSignupModal = () => {
+    setIsSignupModalOpen(true)
+    setIsLoginModalOpen(false)
+  }
+
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-sm shadow-sm">
+    <header className="fixed top-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-sm shadow-sm">
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center">
@@ -39,13 +49,13 @@ export default function Navbar() {
               Demo
             </a>
             <button
-              onClick={() => setIsLoginModalOpen(true)}
+              onClick={openLoginModal}
               className="text-blue-600 hover:text-blue-800 transition-colors"
             >
               Login
             </button>
             <button
-              onClick={() => setIsSignupModalOpen(true)}
+              onClick={openSignupModal}
               className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full px-5 py-2 text-sm font-semibold shadow-md transition-all hover:shadow-lg hover:scale-105"
             >
               Sign Up
@@ -57,6 +67,7 @@ export default function Navbar() {
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="text-gray-700 hover:text-blue-600 transition-colors"
+              aria-label={isMenuOpen ? "Close menu" : "Open menu"}
             >
               {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
@@ -87,7 +98,7 @@ export default function Navbar() {
               <div className="flex space-x-4 pt-2">
                 <button
                   onClick={() => {
-                    setIsLoginModalOpen(true)
+                    openLoginModal()
                     setIsMenuOpen(false)
                   }}
                   className="text-blue-600 hover:text-blue-800 transition-colors"
@@ -96,7 +107,7 @@ export default function Navbar() {
                 </button>
                 <button
                   onClick={() => {
-                    setIsSignupModalOpen(true)
+                    openSignupModal()
                     setIsMenuOpen(false)
                   }}
                   className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full px-5 py-2 text-sm font-semibold shadow-md transition-all hover:shadow-lg hover:scale-105"
@@ -110,8 +121,16 @@ export default function Navbar() {
       </div>
 
       {/* Modals */}
-      <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} />
-      <SignupModal isOpen={isSignupModalOpen} onClose={() => setIsSignupModalOpen(false)} />
+      <LoginModal 
+        isOpen={isLoginModalOpen} 
+        onClose={() => setIsLoginModalOpen(false)} 
+        onOpenSignup={openSignupModal} 
+      />
+      <SignupModal 
+        isOpen={isSignupModalOpen} 
+        onClose={() => setIsSignupModalOpen(false)} 
+        onOpenLogin={openLoginModal} 
+      />
     </header>
   )
 }

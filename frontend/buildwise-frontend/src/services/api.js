@@ -1,70 +1,112 @@
-import axios from 'axios';
-
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api', // Add fallback URL
-  headers: {
-    'Content-Type': 'application/json'
-  }
-});
-
-// Add auth token to requests
-api.interceptors.request.use(config => {
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
-}, error => {
-  return Promise.reject(error);
-});
-
-// Add response interceptor to handle errors globally
-api.interceptors.response.use(
-    response => response,
-    error => {
-      if (error.response) {
-        console.error('API Error:', error.response.status, error.response.data);
-      } else {
-        console.error('API Error:', error.message);
-      }
-      return Promise.reject(error);
-    }
-  );
+// src/services/api.js
+import { 
+    collection, 
+    addDoc, 
+    doc, 
+    getDoc, 
+    getDocs, 
+    updateDoc, 
+    deleteDoc, 
+    query, 
+    where,
+    orderBy,
+    limit
+  } from "firebase/firestore";
+  import { db } from "../firebase";
   
-
-  export const getProjects = async (userId) => {
-    try {
-      const response = await api.get(`/projects?userId=${userId}`);
-      return response.data || []; // Always return array
-    } catch (error) {
-      console.error('Error fetching projects:', error);
-      return []; // Return empty array on error
-    }
-  };
-  
+  // Create a new project
   export const createProject = async (projectData) => {
     try {
-      const response = await api.post('/projects', projectData);
-      return response.data;
+      const docRef = await addDoc(collection(db, "projects"), projectData);
+      return { id: docRef.id, ...projectData };
     } catch (error) {
-      console.error('Error creating project:', error);
-      throw error; // Re-throw to handle in component
+      console.error("Error adding project: ", error);
+      throw error;
     }
   };
   
-export const getRecentActivity = async (userId) => {
-  const response = await api.get(`/activity?userId=${userId}`);
-  return response.data;
-};
-
-// export const createProject = async (projectData) => {
-//     const response = await api.post('/projects', projectData);
-//     return response.data;
-//   };
-  
-  export const getMaterialOptions = async () => {
-    const response = await api.get('/materials');
-    return response.data;
+  // Get all projects for a user (alias for getUserProjects)
+  export const getProjects = async (userId) => {
+    return getUserProjects(userId);
   };
-
-export default api;
+  
+  // Get all projects for a user
+  export const getUserProjects = async (userId) => {
+    try {
+      const q = query(collection(db, "projects"), where("userId", "==", userId));
+      const querySnapshot = await getDocs(q);
+      
+      return querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+    } catch (error) {
+      console.error("Error getting projects: ", error);
+      throw error;
+    }
+  };
+  
+  // Get recent activity for a user
+  export const getRecentActivity = async (userId, limitCount = 5) => {
+    try {
+      const q = query(
+        collection(db, "activities"),
+        where("userId", "==", userId),
+        orderBy("timestamp", "desc"),
+        limit(limitCount)
+      );
+      const querySnapshot = await getDocs(q);
+      
+      return querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+    } catch (error) {
+      console.error("Error getting recent activity: ", error);
+      throw error;
+    }
+  };
+  
+  // Get a single project by ID
+  export const getProjectById = async (projectId) => {
+    try {
+      const docRef = doc(db, "projects", projectId);
+      const docSnap = await getDoc(docRef);
+      
+      if (docSnap.exists()) {
+        return { id: docSnap.id, ...docSnap.data() };
+      } else {
+        throw new Error("Project not found");
+      }
+    } catch (error) {
+      console.error("Error getting project: ", error);
+      throw error;
+    }
+  };
+  
+  // Update a project
+  export const updateProject = async (projectId, updatedData) => {
+    try {
+      const docRef = doc(db, "projects", projectId);
+      await updateDoc(docRef, {
+        ...updatedData,
+        updatedAt: new Date().toISOString()
+      });
+      return { id: projectId, ...updatedData };
+    } catch (error) {
+      console.error("Error updating project: ", error);
+      throw error;
+    }
+  };
+  
+  // Delete a project
+  export const deleteProject = async (projectId) => {
+    try {
+      const docRef = doc(db, "projects", projectId);
+      await deleteDoc(docRef);
+      return { success: true };
+    } catch (error) {
+      console.error("Error deleting project: ", error);
+      throw error;
+    }
+  };

@@ -41,7 +41,7 @@ export default function ProjectCard({ project, onClick }) {
             <div className="ml-3">
               <p className="text-sm text-gray-500">Total cost</p>
               <p className="text-sm font-medium text-gray-900">
-                ${project.totalCost.toLocaleString()}
+              ${project.totalCost?.toLocaleString() || '0'}
               </p>
             </div>
           </div>

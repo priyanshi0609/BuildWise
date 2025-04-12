@@ -3,20 +3,24 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-export default function CostBreakdownChart({ projects }) {
-  // Aggregate data from all projects
+export default function CostBreakdownChart({ projects = [] }) {
+  // Safely aggregate data from all projects
   const data = {
     labels: ['Materials', 'Labor', 'Equipment', 'Overhead'],
     datasets: [
       {
-        data: projects.reduce((acc, project) => {
-          return [
-            acc[0] + project.costBreakdown.materials,
-            acc[1] + project.costBreakdown.labor,
-            acc[2] + project.costBreakdown.equipment,
-            acc[3] + project.costBreakdown.overhead
-          ];
-        }, [0, 0, 0, 0]),
+        data: projects.reduce(
+          (acc, project) => {
+            const breakdown = project?.costBreakdown || {};
+            return [
+              acc[0] + (breakdown.materials || 0),
+              acc[1] + (breakdown.labor || 0),
+              acc[2] + (breakdown.equipment || 0),
+              acc[3] + (breakdown.overhead || 0)
+            ];
+          }, 
+          [0, 0, 0, 0]
+        ),
         backgroundColor: [
           '#3B82F6',
           '#10B981',

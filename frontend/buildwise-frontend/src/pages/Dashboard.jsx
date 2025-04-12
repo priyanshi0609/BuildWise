@@ -1,316 +1,436 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
-  PlusCircle,
-  FileText,
-  BarChart2,
-  Settings,
+  ArrowLeft,
   HardHat,
+  Box,
+  Users,
   Clock,
+  MapPin,
   DollarSign,
-  ArrowRight
+  Check,
+  AlertTriangle,
+  Wifi,
+  WifiOff,
+  Save
 } from 'lucide-react';
-
-import ProjectCard from '../components/dashboard/ProjectCard';
-import CostBreakdownChart from '../components/dashboard/CostBreakdownChart';
-import RecentActivity from '../components/dashboard/RecentActivity';
-// import Optimization from '../components/dashboard/Optimize';
+import ProjectForm from '../components/forms/ProjectForm';
+import MaterialSelector from '../components/forms/MaterialSelector';
 import { useAuth } from '../Authcontext';
-import { getProjects } from '../services/api';
+import { createProject } from '../services/api';
 
-export default function Dashboard() {
-  // Local state for project list, loading/error indicators, and tab navigation
-  const [projects, setProjects] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+export default function NewProjectPage() {
+  const [step, setStep] = useState(1);
+  const [formData, setFormData] = useState({
+    name: '',
+    location: '',
+    dimensions: { length: '', width: '', height: '' },
+    materials: [],
+    laborHours: 0,
+    laborCostPerHour: 50, // Default labor cost
+    equipmentCost: 0,
+    overheadCost: 0,
+    startDate: new Date().toISOString().split('T')[0],
+    description: '',
+    status: 'active'
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState('projects');
-
-  const { currentUser, logout } = useAuth() || {};
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [savedLocally, setSavedLocally] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const { currentUser } = useAuth();
   const navigate = useNavigate();
 
-  // Fetch user's projects from Firebase on component mount
-  useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
+  // Calculate derived values
+  const calculateCosts = () => {
+    const materialsCost = formData.materials.reduce(
+      (sum, material) => sum + (material.price * material.quantity), 0
+    );
+    const laborCost = formData.laborHours * formData.laborCostPerHour;
+    const totalCost = materialsCost + laborCost + formData.equipmentCost + formData.overheadCost;
 
-        if (currentUser?.uid) {
-          const userProjects = await getProjects(currentUser.uid);
-          setProjects(Array.isArray(userProjects) ? userProjects : []);
-        }
-      } catch (err) {
-        console.error('Error fetching projects:', err);
-        setError(err.message || 'Failed to load projects');
-        setProjects([]);
-      } finally {
-        setIsLoading(false);
+    return {
+      materialsCost,
+      laborCost,
+      totalCost,
+      costBreakdown: {
+        materials: materialsCost,
+        labor: laborCost,
+        equipment: formData.equipmentCost,
+        overhead: formData.overheadCost
       }
     };
+  };
 
-    fetchProjects();
+  const costs = calculateCosts();
+
+  // Monitor online status
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    // Check for locally saved draft
+    const savedDraft = localStorage.getItem('projectDraft');
+    if (savedDraft) {
+      try {
+        const draftData = JSON.parse(savedDraft);
+        if (draftData.userId === currentUser?.uid) {
+          if (window.confirm('We found a saved draft project. Would you like to restore it?')) {
+            setFormData(draftData.formData);
+          } else {
+            localStorage.removeItem('projectDraft');
+          }
+        }
+      } catch (e) {
+        console.error('Error parsing saved draft:', e);
+        localStorage.removeItem('projectDraft');
+      }
+    }
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
   }, [currentUser]);
 
-  // Animation configs for staggered fade-in effect
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.1, delayChildren: 0.2 }
+  const saveProjectLocally = () => {
+    if (!currentUser?.uid) return;
+    
+    try {
+      localStorage.setItem('projectDraft', JSON.stringify({
+        userId: currentUser.uid,
+        formData,
+        savedAt: new Date().toISOString()
+      }));
+      setSavedLocally(true);
+      setTimeout(() => setSavedLocally(false), 3000);
+    } catch (e) {
+      console.error('Error saving project locally:', e);
     }
   };
 
-  const itemVariants = {
-    hidden: { y: 20, opacity: 0 },
-    visible: {
-      y: 0,
-      opacity: 1,
-      transition: { type: 'spring', stiffness: 100 }
+  const handleSubmit = async () => {
+    if (!currentUser?.uid) {
+      setError('User not authenticated');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError(null);
+    
+    if (!formData.name) {
+      setError('Project name is required');
+      setIsSubmitting(false);
+      return;
+    }
+    
+    saveProjectLocally();
+    
+    if (!isOnline) {
+      setError('You are currently offline. Project has been saved locally and will be submitted when you\'re back online.');
+      setIsSubmitting(false);
+      return;
+    }
+    
+    try {
+      const now = new Date().toISOString();
+      const projectToCreate = {
+        ...formData,
+        ...costs, // Include calculated costs
+        userId: currentUser.uid,
+        createdAt: now,
+        updatedAt: now,
+      };
+      
+      const response = await createProject(projectToCreate);
+      
+      if (response) {
+        localStorage.removeItem('projectDraft');
+        setShowSuccess(true);
+        setTimeout(() => {
+          navigate('/dashboard', { state: { projectCreated: true } });
+        }, 1500);
+      } else {
+        throw new Error('Failed to create project. Empty response received.');
+      }
+    } catch (error) {
+      console.error('Project creation failed:', error);
+      
+      if (error.message === 'Network Error') {
+        setError('Unable to connect to the server. Project has been saved locally and will be submitted when connection is restored.');
+      } else {
+        setError(error.response?.data?.message || 
+                error.message || 
+                'Failed to create project. Please try again.');
+      }
+      setIsSubmitting(false);
     }
   };
 
-  // Redirect unauthenticated users to login
-  if (!currentUser) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="text-center">
-          <h2 className="text-xl font-semibold mb-4">Authentication Required</h2>
-          <p className="mb-4">Please log in to access the dashboard</p>
-          <button
-            onClick={() => navigate('/')}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-          >
-            Go to Login
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // Show loading spinner while fetching projects
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
-
-  // Display error screen if fetching fails
-  if (error) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="text-center p-6 bg-red-50 rounded-lg max-w-md">
-          <h2 className="text-xl font-semibold text-red-600 mb-4">Error Loading Dashboard</h2>
-          <p className="mb-4">{error}</p>
-          <div className="flex justify-center gap-4">
-            <button
-              onClick={() => window.location.reload()}
-              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-            >
-              Try Again
-            </button>
-            <button
-              onClick={logout}
-              className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
-            >
-              Logout
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // Function to try submitting again
+  const retrySubmit = () => {
+    setError(null);
+    handleSubmit();
+  };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Top header section */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-900 flex items-center">
-            <HardHat className="h-8 w-8 text-blue-600 mr-2" />
-            BuildWise Dashboard
-          </h1>
-          <button
-            onClick={() => navigate('/settings')}
-            className="flex items-center px-4 py-2 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors"
-          >
-            <Settings className="h-4 w-4 mr-2" />
-            Settings
-          </button>
-        </div>
-      </header>
-
-      <main className="max-w-7xl mx-auto px-4 py-6">
-        {/* Welcome Banner */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-xl p-6 mb-8 text-white shadow-lg"
-        >
-          <div className="flex justify-between items-center">
-            <div>
-              <h2 className="text-2xl font-bold mb-2">Welcome back, {currentUser.displayName || 'User'}!</h2>
-              <p className="opacity-90">
-                {projects.length === 0
-                  ? "You don't have any projects yet"
-                  : `You have ${projects.length} active project${projects.length !== 1 ? 's' : ''}`}
-              </p>
-            </div>
-            <button
-              className="bg-white text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg flex items-center font-medium shadow-sm"
-              onClick={() => navigate('/new-project')}
+    <div className="min-h-screen bg-gray-50 p-6">
+      <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
+        {/* Success Toast */}
+        <AnimatePresence>
+          {showSuccess && (
+            <motion.div
+              initial={{ opacity: 0, y: -50 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -50 }}
+              transition={{ duration: 0.3 }}
+              className="bg-green-50 border border-green-200 text-green-700 p-4 flex items-center justify-center gap-2"
             >
-              <PlusCircle className="h-5 w-5 mr-2" />
-              New Project
-            </button>
-          </div>
-        </motion.div>
+              <Check className="h-5 w-5 text-green-500" />
+              <span>Project created successfully!</span>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
-        {/* Tabs for Projects, Analytics, Reports, Optimization */}
-        <div className="border-b border-gray-200 mb-6">
-          <nav className="-mb-px flex space-x-8">
-            {['projects', 'analytics', 'reports'].map(tab => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`${activeTab === tab
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                  } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm`}
-              >
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
-              </button>
-            ))}
-          </nav>
+        {/* Network Status Indicator */}
+        <div className={`px-4 py-2 flex items-center justify-center gap-2 text-sm ${isOnline ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-700'}`}>
+          {isOnline ? (
+            <>
+              <Wifi className="h-4 w-4" />
+              <span>Online - Changes will be saved to the server</span>
+            </>
+          ) : (
+            <>
+              <WifiOff className="h-4 w-4" />
+              <span>Offline - Changes will be saved locally</span>
+            </>
+          )}
+        </div>
+        
+        {/* Save confirmation */}
+        {savedLocally && (
+          <div className="px-4 py-2 bg-blue-50 text-blue-700 flex items-center justify-center gap-2 text-sm">
+            <Save className="h-4 w-4" />
+            <span>Draft saved locally</span>
+          </div>
+        )}
+
+        {/* Header */}
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 text-white">
+          <div className="flex items-center justify-between">
+            <button 
+              onClick={() => step > 1 ? setStep(step-1) : navigate('/dashboard')}
+              className="flex items-center gap-2 hover:bg-blue-700 p-2 rounded-full transition-colors"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </button>
+            <h2 className="text-xl font-bold flex items-center gap-2">
+              <HardHat className="h-6 w-6" />
+              New Project
+            </h2>
+            <div className="w-6"></div> {/* Spacer */}
+          </div>
+          <div className="mt-4 flex justify-center">
+            <div className="flex items-center gap-8">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex flex-col items-center">
+                  <div className={`h-8 w-8 rounded-full flex items-center justify-center 
+                    ${step >= i ? 'bg-white text-blue-600' : 'bg-blue-500 text-white'}`}>
+                    {step > i ? <Check className="h-4 w-4" /> : i}
+                  </div>
+                  <span className={`text-xs mt-1 ${step >= i ? 'font-semibold' : 'text-blue-200'}`}>
+                    {i === 1 ? 'Details' : i === 2 ? 'Materials' : 'Review'}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
-        {/* --- Projects Tab --- */}
-        {activeTab === 'projects' && (
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
-          >
-            {projects.length > 0 ? (
-              projects.map((project) => (
-                <motion.div key={project.id || Math.random()} variants={itemVariants}>
-                  <ProjectCard
-                    project={project}
-                    onClick={() => navigate(`/projects/${project.id}`)}
-                  />
-                </motion.div>
-              ))
-            ) : (
-              // Show when there are no projects
-              <div className="col-span-full text-center py-12">
-                <div className="bg-white p-8 rounded-lg shadow-sm max-w-md mx-auto">
-                  <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No projects yet</h3>
-                  <p className="text-gray-500 mb-6">Get started by creating your first project</p>
-                  <button
-                    onClick={() => navigate('/new-project')}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center mx-auto"
+        {/* Form Content */}
+        <motion.div 
+          key={step}
+          initial={{ opacity: 0, x: step === 1 ? -20 : 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.3 }}
+          className="p-6"
+        >
+          {/* Display error message if there is one */}
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-md flex flex-col">
+              <div className="flex items-start gap-2">
+                <AlertTriangle className="h-5 w-5 mt-0.5 flex-shrink-0" />
+                <span>{error}</span>
+              </div>
+              {error.includes('offline') || error.includes('connect to the server') ? (
+                <div className="mt-2 flex justify-end">
+                  <button 
+                    onClick={saveProjectLocally}
+                    className="mr-2 px-3 py-1 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
                   >
-                    <PlusCircle className="h-5 w-5 mr-2" />
-                    Create Project
+                    Save Draft
+                  </button>
+                  <button 
+                    onClick={retrySubmit}
+                    className="px-3 py-1 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200"
+                  >
+                    Retry
+                  </button>
+                </div>
+              ) : null}
+            </div>
+          )}
+
+          {step === 1 && (
+            <ProjectForm 
+              formData={formData}
+              onUpdate={(data) => {
+                setFormData({...formData, ...data});
+                if (Object.keys(data).length > 0) {
+                  saveProjectLocally(); // Auto-save when form changes
+                }
+              }}
+              onNext={() => setStep(2)}
+            />
+          )}
+          
+          {step === 2 && (
+            <MaterialSelector 
+              selectedMaterials={formData.materials}
+              onUpdate={(materials) => {
+                setFormData({...formData, materials});
+                saveProjectLocally(); // Auto-save when materials change
+              }}
+              onBack={() => setStep(1)}
+              onNext={() => setStep(3)}
+            />
+          )}
+
+          {step === 3 && (
+            <div className="space-y-6">
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                <Check className="h-5 w-5 text-green-500" />
+                Review Your Project
+              </h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-medium flex items-center gap-2">
+                      <HardHat className="h-4 w-4 text-blue-500" />
+                      Project Details
+                    </h4>
+                    <div className="mt-2 space-y-2">
+                      <p><span className="font-medium">Name:</span> {formData.name}</p>
+                      <p className="flex items-start gap-2">
+                        <MapPin className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                        <span><span className="font-medium">Location:</span> {formData.location || 'Not specified'}</span>
+                      </p>
+                      <p><span className="font-medium">Status:</span> {formData.status}</p>
+                      <p className="flex items-start gap-2">
+                        <Clock className="h-4 w-4 flex-shrink-0 mt-0.5" />
+                        <span><span className="font-medium">Start Date:</span> {new Date(formData.startDate).toLocaleDateString()}</span>
+                      </p>
+                      {formData.description && (
+                        <p><span className="font-medium">Description:</span> {formData.description}</p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-medium flex items-center gap-2">
+                      <Box className="h-4 w-4 text-blue-500" />
+                      Dimensions
+                    </h4>
+                    <div className="mt-2 space-y-2">
+                      <p><span className="font-medium">Length:</span> {formData.dimensions.length || '0'} ft</p>
+                      <p><span className="font-medium">Width:</span> {formData.dimensions.width || '0'} ft</p>
+                      <p><span className="font-medium">Height:</span> {formData.dimensions.height || '0'} ft</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-medium flex items-center gap-2">
+                      <Users className="h-4 w-4 text-blue-500" />
+                      Labor
+                    </h4>
+                    <div className="mt-2 space-y-2">
+                      <p><span className="font-medium">Hours:</span> {formData.laborHours || '0'}</p>
+                      <p><span className="font-medium">Cost:</span> ${costs.laborCost.toLocaleString()}</p>
+                    </div>
+                  </div>
+
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-medium flex items-center gap-2">
+                      <DollarSign className="h-4 w-4 text-blue-500" />
+                      Costs
+                    </h4>
+                    <div className="mt-2 space-y-2">
+                      <p><span className="font-medium">Materials:</span> ${costs.materialsCost.toLocaleString()}</p>
+                      <p><span className="font-medium">Labor:</span> ${costs.laborCost.toLocaleString()}</p>
+                      <p><span className="font-medium">Equipment:</span> ${formData.equipmentCost.toLocaleString()}</p>
+                      <p><span className="font-medium">Overhead:</span> ${formData.overheadCost.toLocaleString()}</p>
+                      <p className="pt-2 border-t mt-2">
+                        <span className="font-medium">Total:</span> ${costs.totalCost.toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h4 className="font-medium flex items-center gap-2">
+                      <Box className="h-4 w-4 text-blue-500" />
+                      Materials
+                    </h4>
+                    {formData.materials?.length > 0 ? (
+                      <ul className="mt-2 space-y-1">
+                        {formData.materials.map((material, index) => (
+                          <li key={index}>
+                            {material.name} ({material.quantity} units) - ${(material.price * material.quantity).toLocaleString()}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="mt-2 text-gray-500">No materials selected</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-between pt-4">
+                <button
+                  onClick={() => setStep(2)}
+                  className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                >
+                  Back
+                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={saveProjectLocally}
+                    className="px-4 py-2 flex items-center gap-2 bg-blue-50 text-blue-700 border border-blue-200 rounded-md hover:bg-blue-100"
+                  >
+                    <Save className="h-4 w-4" />
+                    Save Draft
+                  </button>
+                  <button
+                    onClick={handleSubmit}
+                    disabled={isSubmitting}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center gap-2"
+                  >
+                    {isSubmitting ? 'Creating...' : 'Create Project'}
                   </button>
                 </div>
               </div>
-            )}
-          </motion.div>
-        )}
-
-        {/* --- Analytics Tab --- */}
-        {activeTab === 'analytics' && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Cost Breakdown Chart */}
-            <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow-md">
-              <h3 className="text-lg font-medium mb-4 flex items-center">
-                <BarChart2 className="h-5 w-5 text-blue-600 mr-2" />
-                Cost Breakdown
-              </h3>
-              {projects.length > 0 ? (
-                <CostBreakdownChart projects={projects} />
-              ) : (
-                <div className="text-center py-8 text-gray-500">
-                  No data available. Create projects to see analytics.
-                </div>
-              )}
             </div>
-
-            {/* Recent Activity Log */}
-            <div className="bg-white p-6 rounded-xl shadow-md">
-              <h3 className="text-lg font-medium mb-4 flex items-center">
-                <Clock className="h-5 w-5 text-blue-600 mr-2" />
-                Recent Activity
-              </h3>
-              <RecentActivity userId={currentUser.uid} />
-            </div>
-          </div>
-        )}
-
-        {/* --- Reports Tab --- */}
-        {activeTab === 'reports' && (
-          <div className="bg-white p-6 rounded-xl shadow-md">
-            <h3 className="text-lg font-medium mb-4 flex items-center">
-              <FileText className="h-5 w-5 text-blue-600 mr-2" />
-              Generated Reports
-            </h3>
-            {projects.filter(p => p.reportGenerated).length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {projects.filter(p => p.reportGenerated).map(project => (
-                  <div key={project.id} className="border rounded-lg p-4 bg-white hover:shadow-md">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h4 className="font-medium">{project.name}</h4>
-                        <p className="text-sm text-gray-500 mt-1">
-                          {project.updatedAt ? new Date(project.updatedAt).toLocaleDateString() : 'No date available'}
-                        </p>
-                      </div>
-                      <button
-                        className="text-blue-600 hover:text-blue-800 text-sm font-medium px-2 py-1 rounded flex items-center"
-                        onClick={() => navigate(`/reports/${project.id}`)}
-                      >
-                        View <ArrowRight className="h-4 w-4 ml-1" />
-                      </button>
-                    </div>
-                    <div className="mt-3 flex items-center text-sm">
-                      <DollarSign className="h-4 w-4 text-green-500 mr-1" />
-                      <span>Estimated: ₹{project.totalCost?.toLocaleString() || '0'}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8 text-gray-500">
-                No reports generated yet. Create projects and generate reports to view them here.
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* --- Optimization Tab --- */}
-        {activeTab === 'optimization' && (
-          <div className="grid grid-cols-1 gap-6">
-            <div className="bg-white p-6 rounded-xl shadow-md">
-              <h3 className="text-lg font-medium mb-4 flex items-center">
-                <Clock className="h-5 w-5 text-blue-600 mr-2" />
-                Optimization Insights
-              </h3>
-              {/* Send the first available project ID to the Optimization component */}
-              {projects.length > 0 ? (
-                <Optimization projectId={projects[0]?.id} />
-              ) : (
-                <p className="text-gray-500">No project available to optimize.</p>
-              )}
-            </div>
-          </div>
-        )}
-      </main>
+          )}
+        </motion.div>
+      </div>
     </div>
   );
 }

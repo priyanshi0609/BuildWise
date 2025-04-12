@@ -108,23 +108,24 @@ export default function ReportDocument({ project }) {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {project.materials.map((material, index) => (
-                  <tr key={index}>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {material.name}
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                      {material.quantity} {material.unit}
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                      ${material.price.toLocaleString()}
-                    </td>
-                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
-                      ${(material.price * material.quantity).toLocaleString()}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
+  {project.materials.map((material, index) => (
+    <tr key={index}>
+      <td className="px-4 py-3 whitespace-nowrap text-sm font-medium text-gray-900">
+        {material.name}
+      </td>
+      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+        {material.quantity} {material.unit}
+      </td>
+      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+        ${Number(material.price || 0).toLocaleString()}
+      </td>
+      <td className="px-4 py-3 whitespace-nowrap text-sm text-gray-500">
+        ${Number((material.price || 0) * (material.quantity || 0)).toLocaleString()}
+      </td>
+    </tr>
+  ))}
+</tbody>
+
             </table>
           </div>
         ) : (

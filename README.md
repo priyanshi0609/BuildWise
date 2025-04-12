@@ -134,7 +134,7 @@ BuildWise/
 │   │   │   └── Settings.jsx
 │   │   ├── services/
 │   │   │   ├── api.js
-│   │   │   └── auth.js              # Merged firebase.js logic here
+│   │   │   └── auth.js             # Firebase admin SDK setup
 │   │   ├── context/
 │   │   │   └── AuthContext.jsx
 │   │   ├── App.jsx
@@ -142,15 +142,6 @@ BuildWise/
 │   │   ├── index.css
 │   │   └── main.jsx
 │   └── package.json
-├── backend/                         
-│   ├── config/
-│   ├── controllers/
-│   ├── models/
-│   ├── routes/
-│   ├── services/
-│   ├── app.js
-│   └── package.json
-├── ai-models/
 ├── docs/
 ├── scripts/
 ├── .env.example

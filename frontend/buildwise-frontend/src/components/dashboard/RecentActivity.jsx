@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Clock, FileText, Edit, CheckCircle } from 'lucide-react';
-import { getRecentActivity } from '../../services/api'; // Adjust the import path as necessary
+//import { getRecentActivity } from '../../services/api'; // Adjust the import path as necessary
 
 export default function RecentActivity({ userId }) {
   const [activities, setActivities] = useState([]);

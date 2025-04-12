@@ -1,88 +1,110 @@
-import { useEffect, useState } from 'react';
-import { Clock, FileText, Edit, CheckCircle } from 'lucide-react';
-//import { getRecentActivity } from '../../services/api'; // Adjust the import path as necessary
+// src/components/dashboard/RecentActivity.jsx
+import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { Clock, HardHat, FileText, DollarSign, PlusCircle, AlertCircle } from 'lucide-react';
+import { getRecentActivity } from '../../services/api';
+
+const activityIcons = {
+  project_created: <HardHat className="h-4 w-4 text-blue-500" />,
+  estimate_created: <FileText className="h-4 w-4 text-green-500" />,
+  cost_updated: <DollarSign className="h-4 w-4 text-amber-500" />,
+  default: <PlusCircle className="h-4 w-4 text-gray-500" />
+};
+
+const activityColors = {
+  project_created: 'bg-blue-50 text-blue-700',
+  estimate_created: 'bg-green-50 text-green-700',
+  cost_updated: 'bg-amber-50 text-amber-700',
+  default: 'bg-gray-50 text-gray-700'
+};
 
 export default function RecentActivity({ userId }) {
   const [activities, setActivities] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchActivities = async () => {
       try {
-        const data = await getRecentActivity(userId);
-        console.log('Fetched activity data:', data); // Debugging line
-
-        // Check if the response is an array or has an "activities" array
-        if (Array.isArray(data)) {
-          setActivities(data);
-        } else if (Array.isArray(data?.activities)) {
-          setActivities(data.activities);
-        } else {
-          setActivities([]); // fallback to empty array
-        }
-      } catch (error) {
-        console.error('Error fetching activities:', error);
-        setActivities([]); // fallback to empty array on error
+        setLoading(true);
+        setError(null);
+        const recentActivities = await getRecentActivity(userId);
+        setActivities(recentActivities || []);
+      } catch (err) {
+        console.error('Error fetching activities:', err);
+        setError(err.message || 'Failed to load recent activity');
+        setActivities([]);
       } finally {
-        setIsLoading(false);
+        setLoading(false);
       }
     };
 
-    fetchActivities();
+    if (userId) {
+      fetchActivities();
+    } else {
+      setLoading(false);
+    }
   }, [userId]);
 
-  const getActivityIcon = (type) => {
-    switch(type) {
-      case 'created':
-        return <FileText className="h-4 w-4 text-blue-500" />;
-      case 'updated':
-        return <Edit className="h-4 w-4 text-yellow-500" />;
-      case 'completed':
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
-      default:
-        return <Clock className="h-4 w-4 text-gray-500" />;
-    }
+  const formatDate = (timestamp) => {
+    if (!timestamp) return '';
+    const date = new Date(timestamp);
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   };
 
-  if (isLoading) {
-    return <div className="text-center py-4">Loading activities...</div>;
+  if (loading) {
+    return (
+      <div className="flex justify-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+//   if (error) {
+//     return (
+//       <div className="p-4 bg-red-50 text-red-700 rounded-md flex items-start gap-2">
+//         <AlertCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
+//         <div>
+//           <p className="font-medium">Error loading activity</p>
+//           {/* <p className="text-sm">{error}</p> */}
+//         </div>
+//       </div>
+//     );
+//   }
+
+  if (!activities || activities.length === 0) {
+    return (
+      <div className="p-4 bg-gray-50 text-gray-500 rounded-md text-center">
+        No recent activity found
+      </div>
+    );
   }
 
   return (
-    <div className="flow-root">
-      <ul className="-mb-8">
-        {activities.map((activity, index) => (
-          <li key={activity.id || index}>
-            <div className="relative pb-8">
-              {index !== activities.length - 1 && (
-                <span className="absolute left-4 top-4 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true"></span>
-              )}
-              <div className="relative flex space-x-3">
-                <div>
-                  <span className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center ring-8 ring-white">
-                    {getActivityIcon(activity.type)}
-                  </span>
-                </div>
-                <div className="flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
-                  <div>
-                    <p className="text-sm text-gray-800">
-                      {activity.message}{' '}
-                      <span className="font-medium text-gray-900">
-                        {activity.projectName}
-                      </span>
-                    </p>
-                  </div>
-                  <div className="whitespace-nowrap text-right text-sm text-gray-500">
-                    <time dateTime={activity.timestamp}>
-                      {new Date(activity.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </time>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </li>
-        ))}
-      </ul>
+    <div className="space-y-3">
+      {activities.map((activity, index) => (
+        <motion.div
+          key={activity.id || index}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: index * 0.05 }}
+          className={`p-3 rounded-md flex items-start gap-3 ${activityColors[activity.type] || activityColors.default}`}
+        >
+          <div className="mt-0.5">
+            {activityIcons[activity.type] || activityIcons.default}
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-medium">{activity.message || 'Activity'}</p>
+            {activity.details && (
+              <p className="text-xs mt-1 opacity-80">{activity.details}</p>
+            )}
+          </div>
+          <div className="text-xs opacity-70 flex items-center gap-1">
+            <Clock className="h-3 w-3" />
+            {formatDate(activity.timestamp)}
+          </div>
+        </motion.div>
+      ))}
     </div>
   );
 }

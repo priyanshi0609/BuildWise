@@ -2,7 +2,7 @@
 
 **BuildWise** is an AI-powered web-based construction cost estimator tailored for civil engineers, contractors, and architects. It helps you **accurately predict project costs**, **optimize budgets**, and **make data-driven decisions** with ease.
 
-🔗 **Live Demo**: [https://buildwise.app](https://buildwise.app) *(placeholder link)*
+🔗 **Live Demo**: [[Click Here](https://build-wise-five.vercel.app/)]
 
 ---
 

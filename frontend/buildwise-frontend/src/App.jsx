@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard';
 import { AuthProvider } from './Authcontext';
 import NewProjectPage from './pages/NewProjectPage';
 import Settings from './pages/Settings';
+import SignupModalS from './pages/signup-model';
 
 const App = () => {
   return (
@@ -15,6 +16,7 @@ const App = () => {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/new-project" element={<NewProjectPage />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/signup-model" element={<SignupModalS />} />
           
         </Routes>
       

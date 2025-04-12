@@ -16,6 +16,8 @@ import {
 import { useAuth } from '../Authcontext';
 import { getProjectById } from '../services/api';
 import ReportDocument from './ReportDocument';
+import { PDFDownloadLink, PDFViewer } from '@react-pdf/renderer';
+import PdfDocument from './PdfDocument'; // We'll create this next
 
 export default function ReportPage() {
   const { id } = useParams();
@@ -24,7 +26,6 @@ export default function ReportPage() {
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {
     const fetchProject = async () => {
@@ -49,14 +50,6 @@ export default function ReportPage() {
       fetchProject();
     }
   }, [id, currentUser]);
-
-  const handleGeneratePDF = () => {
-    setIsGenerating(true);
-    // In a real app, this would generate and download the PDF
-    setTimeout(() => {
-      setIsGenerating(false);
-    }, 2000);
-  };
 
   const formatDate = (dateString) => {
     if (!dateString) return 'Not specified';
@@ -122,18 +115,20 @@ export default function ReportPage() {
                 </div>
               </div>
               <div className="flex gap-3">
-                <button
-                  onClick={handleGeneratePDF}
-                  disabled={isGenerating}
-                  className="px-4 py-2 bg-white text-blue-600 rounded-lg flex items-center gap-2 hover:bg-blue-50 disabled:opacity-50"
+                <PDFDownloadLink 
+                  document={<PdfDocument project={project} />} 
+                  fileName={`${project.name}_report.pdf`}
+                  className="px-4 py-2 bg-white text-blue-600 rounded-lg flex items-center gap-2 hover:bg-blue-50"
                 >
-                  {isGenerating ? 'Generating...' : (
-                    <>
-                      <Download className="h-4 w-4" />
-                      Download PDF
-                    </>
-                  )}
-                </button>
+                  {({ blob, url, loading, error }) => 
+                    loading ? 'Generating PDF...' : (
+                      <>
+                        <Download className="h-4 w-4" />
+                        Download PDF
+                      </>
+                    )
+                  }
+                </PDFDownloadLink>
                 <button
                   onClick={() => window.print()}
                   className="px-4 py-2 bg-white text-blue-600 rounded-lg flex items-center gap-2 hover:bg-blue-50"

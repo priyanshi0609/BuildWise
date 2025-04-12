@@ -40,16 +40,7 @@
 
 ## 🧠 AI Models
 
-### 1. **Cost Prediction Model**
-- 📌 Input: Project size, materials, and location.  
-- 🎯 Output: Estimated total cost with ± accuracy margin.
-
-### 2. **Material Optimization Model**
-- Suggests affordable yet durable alternatives.
-- Combines rule-based logic and machine learning.
-
-### 3. **Labor Estimation Model**
-- Calculates labor hours using complexity and scale factors.
+### Gemini API has been used in Buildwise for cost optimization
 
 ---
 

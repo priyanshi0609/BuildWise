@@ -52,6 +52,41 @@
 
 ---
 
+
+## 🔄 Workflow Overview
+
+#### 1. User Authentication 
+
+Sign-up → Email verification / Google Auth → Login
+
+#### 2. Project Input
+
+Form submission → Data validation → Cost calculation
+
+#### 3. Dashboard
+
+Real-time cost breakdown → Interactive visualization
+
+#### 4. Optimization
+
+Gemini API analysis → Alternative suggestions → Cost comparison
+
+#### 5. Report Generation
+
+PDF compilation → Download/Save to history
+
+
+
+
+
+
+
+
+
+
+
+
+
 ## 🛠️ Tech Stack
 
 | Layer         | Technology                            | Purpose                          |

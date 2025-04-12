@@ -68,9 +68,20 @@
 
 ## Installation Commands (to run locally)
 
-###  Clone the repository
+### Installation
+```bash
+# Clone repository
+git clone [https://github.com/priyanshi0609/BuildWise
 
+# Install frontend dependencies
+cd buildwise
+cd frontend
+cd buildwise-frontend
+npm install
+# run the project
+npm run dev
 
+```
 
 
 

@@ -2,14 +2,15 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { signInWithPopup } from "firebase/auth";
-import { auth, provider } from '/src/firebase.js';
-
+import { auth, provider } from "/src/firebase.js";
+import { useNavigate } from "react-router-dom"; // ✅ Added this
 
 export default function LoginModal({ isOpen, onClose, onOpenSignup }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const navigate = useNavigate(); // ✅ Added this
 
   useEffect(() => {
     if (isOpen) {
@@ -26,6 +27,7 @@ export default function LoginModal({ isOpen, onClose, onOpenSignup }) {
     e.preventDefault();
     console.log("Login attempt with:", { email, password, rememberMe });
     onClose();
+    navigate("/dashboard"); // ✅ Redirect on login
   };
 
   const switchToSignup = () => {
@@ -42,6 +44,7 @@ export default function LoginModal({ isOpen, onClose, onOpenSignup }) {
       console.log("Google User:", user);
       alert(`Welcome ${user.displayName}`);
       onClose();
+      navigate("/dashboard"); // ✅ Redirect after Google login
     } catch (error) {
       console.error("Google Sign-In Error:", error);
       alert("Google Sign-In failed. Please try again.");

@@ -5,13 +5,18 @@ import { motion, useInView, useAnimation, AnimatePresence } from "framer-motion"
 import { Globe, Hammer, CircleDollarSign, Lightbulb, ArrowRight, ChevronDown } from "lucide-react"
 import { TypeAnimation } from "react-type-animation"
 import Navbar from "./Navbar"
+import SignupModal from "./signup-model"
+import LoginModal from "./login-model"
 
 export default function Home() {
   const ref = useRef(null)
   const isInView = useInView(ref, { once: true })
   const controls = useAnimation()
   const [activeTestimonial, setActiveTestimonial] = useState(0)
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false)
+  const [isSignupModalOpen, setIsSignupModalOpen] = useState(false)
 
+  
   useEffect(() => {
     if (isInView) {
       controls.start("visible")
@@ -29,7 +34,7 @@ export default function Home() {
       },
     },
   }
-
+ 
   const item = {
     hidden: { y: 20, opacity: 0 },
     visible: {
@@ -40,6 +45,18 @@ export default function Home() {
         stiffness: 100,
       },
     },
+  }
+
+  // Open the Login Modal
+  const openLoginModal = () => {
+    setIsLoginModalOpen(true)
+    setIsSignupModalOpen(false) // Close signup modal when login is opened
+  }
+
+  // Open the Signup Modal
+  const openSignupModal = () => {
+    setIsSignupModalOpen(true)
+    setIsLoginModalOpen(false) // Close login modal when signup is opened
   }
 
   // Testimonials data
@@ -133,11 +150,13 @@ export default function Home() {
             className="mt-10 flex gap-4"
           >
             <button 
-              onClick={() => navigate('/dashboard')}
+              onClick={openSignupModal}
               className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full px-8 py-4 text-lg font-semibold shadow-lg transition-all hover:shadow-xl hover:scale-105 flex items-center">
               Get Started <ArrowRight className="ml-2 h-5 w-5" />
             </button>
-            <button className="border-2 border-blue-600 text-blue-600 hover:bg-blue-50 rounded-full px-8 py-4 text-lg font-semibold transition-all hover:shadow-md">
+            <button 
+              onClick={openSignupModal}
+              className="border-2 border-blue-600 text-blue-600 hover:bg-blue-50 rounded-full px-8 py-4 text-lg font-semibold transition-all hover:shadow-md">
               See Demo
             </button>
           </motion.div>

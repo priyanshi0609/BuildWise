@@ -66,14 +66,16 @@
 
 ---
 
+
+
 ## 🌐 API Reference
 
 | Endpoint            | Method | Description                       |
 |---------------------|--------|-----------------------------------|
-| `/api/estimate`     | POST   | Calculate project cost            |
-| `/api/optimize`     | POST   | Get optimization suggestions      |
+| `/api/estimate`     | POST   | Calculate project cost using Gemini API |
+| `/api/optimize`     | POST   | Get optimization suggestions using Gemini API |
 | `/api/report`       | POST   | Generate and download PDF report  |
-| `/api/auth/login`   | POST   | User authentication               |
+| `/api/auth/login`   | POST   | User authentication via Firebase API |
 
 ---
 
@@ -85,75 +87,60 @@
 BuildWise/
 ├── frontend/
 │   ├── public/
+│   │   ├── assets/                 # Image assets
+│   │   │   ├── arsh.png
+│   │   │   ├── BuildWise.svg
+│   │   │   ├── person1.png
+│   │   │   ├── priyanshi.png
+│   │   │   └── vite.svg
 │   │   ├── index.html
-│   │   ├── favicon.ico
-│   │   └── assets/                  # Logos, images
+│   │   └── favicon.ico
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── Auth/               # Login/Signup
-│   │   │   ├── Dashboard/          # Charts, CostSummary
-│   │   │   ├── Forms/              # ProjectInput, MaterialSelector
-│   │   │   ├── Optimization/       # Suggestions, Comparison
-│   │   │   └── Report/             # PDFGenerator
+│   │   │   ├── Auth/
+│   │   │   │   ├── login-model.jsx     
+│   │   │   │   └── signup-model.jsx    
+│   │   │   ├── Dashboard/             # Charts, CostSummary
+│   │   │   │   ├── CostBreakdownChart.jsx
+│   │   │   │   ├── ProjectCard.jsx
+│   │   │   │   └── RecentActivity.jsx
+│   │   │   ├── Forms/
+│   │   │   │   ├── MaterialSelector.jsx
+│   │   │   │   └── ProjectForm.jsx
+│   │   │   ├── Layout/
+│   │   │   │   └── Navbar.jsx
+│   │   │   └── Report/
+│   │   │       └── ReportDocument.jsx
 │   │   ├── pages/
-│   │   │   ├── Home.jsx            # Landing page
-│   │   │   ├── Estimate.jsx        # Cost estimation form
-│   │   │   ├── Dashboard.jsx       # Main dashboard
-│   │   │   └── Optimize.jsx        # AI suggestions
+│   │   │   ├── Dashboard.jsx
+│   │   │   ├── EditProjectPage.jsx
+│   │   │   ├── Estimate.jsx
+│   │   │   ├── History.jsx
+│   │   │   ├── Home.jsx       # Landing page
+│   │   │   ├── NewProjectPage.jsx
+│   │   │   ├── NotFound.jsx
+│   │   │   ├── Optimize.jsx          # Suggestions, Comparison
+│   │   │   ├── ProjectDetail.jsx
+│   │   │   ├── ReportPage.jsx
+│   │   │   └── Settings.jsx
 │   │   ├── services/
-│   │   │   ├── api.js              # Axios calls
-│   │   │   └── auth.js             # Firebase auth
-│   │   ├── utils/
-│   │   │   ├── calculations.js     # Cost formulas
-│   │   │   └── formatters.js       # Currency/units
+│   │   │   ├── api.js
+│   │   │   └── auth.js             # Firebase admin SDK setup
+│   │   ├── context/
+│   │   │   └── AuthContext.jsx
 │   │   ├── App.jsx
-│   │   ├── main.jsx
-│   │   └── firebaseConfig.js       # Firebase keys
+│   │   ├── App.css
+│   │   ├── index.css
+│   │   └── main.jsx
 │   └── package.json
-├── backend/
-│   ├── config/
-│   │   ├── firebaseConfig.js       # Firebase admin SDK
-│   │   └── rates.json             # Default material rates
-│   ├── controllers/
-│   │   ├── authController.js       # User auth
-│   │   ├── costController.js       # Cost calculations
-│   │   └── optimizeController.js   # AI suggestions
-│   ├── models/
-│   │   ├── Project.js              # Mongoose/Firestore schema
-│   │   └── User.js
-│   ├── routes/
-│   │   ├── authRoutes.js
-│   │   ├── costRoutes.js
-│   │   └── optimizeRoutes.js
-│   ├── services/
-│   │   ├── costService.js          # Core cost logic
-│   │   ├── optimization.js         # AI rule engine
-│   │   └── reportService.js        # PDF generation
-│   ├── app.js
-│   ├── server.js
-│   └── package.json
-├── ai-models/                      # Python-based AI
-│   ├── cost_prediction/
-│   │   ├── train_model.py          # scikit-learn/TensorFlow
-│   │   └── model.h5                # Trained weights
-│   └── material_optimization/
-│       ├── rules.json              # Rule-based alternatives
-│       └── optimize.py             # ML suggestions
 ├── docs/
-│   ├── API.md                      # Endpoint documentation
-│   └── ARCHITECTURE.md             # Tech decisions
 ├── scripts/
-│   ├── deploy.sh                   # CI/CD automation
-│   └── fetch_prices.sh             # API data pipeline
-├── .env.example                    # Environment variables
+├── .env.example
 ├── .gitignore
 ├── LICENSE
-└── README.md                       # Project overview
+└── README.md
+
 ```
-
-
-
-
 
 
 ## 🤝 Contributing

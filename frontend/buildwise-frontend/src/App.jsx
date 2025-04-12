@@ -4,6 +4,7 @@ import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
 import { AuthProvider } from './Authcontext';
 import NewProjectPage from './pages/NewProjectPage';
+import Settings from './pages/Settings';
 
 const App = () => {
   return (
@@ -13,7 +14,8 @@ const App = () => {
           <Route path="/" element={<Home />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/new-project" element={<NewProjectPage />} />
-          {/* Add more routes here as needed */}
+          <Route path="/settings" element={<Settings />} />
+          
         </Routes>
       
     </AuthProvider>

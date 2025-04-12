@@ -68,25 +68,51 @@
 
 ## Installation Commands (to run locally)
 
-### Installation
-```bash
-# Clone repository
-git clone https://github.com/priyanshi0609/BuildWise
+####  Clone repository
 
-# Install frontend dependencies
+```bash
+git clone https://github.com/priyanshi0609/BuildWise
+```
+
+#### Install frontend dependencies
+
+```bash
 cd buildwise
 cd frontend
 cd buildwise-frontend
 npm install
+```
 
+#### 🔐 Environment Setup
 
-# run the project
+```bash
+# Add these to your .env file (frontend)
+ 'FIREBASE_API_KEY=your-key' >> .env
+ 'FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com' >> .env
+ 'FIREBASE_PROJECT_ID=your-project-id' >> .env
+ 'VITE_GEMINI_API_KEY=your-gemini-key' >> .env
+```
+
+#### run the project
+```bash
 npm run dev
-
 ```
 
 
+## 🔥 Firebase Setup
+1. Enable Authentication (Email/Google)
+2. Create Firestore database in test mode
+3. Add your web app config to .env
 
+## 🤖 Gemini API Notes
+- Used in Optimize.jsx components
+- Rate limit: 60 RPM (adjust in code if needed)
+- Store API keys ONLY in .env
+
+## 🚨 Troubleshooting
+# Common issues fix:
+rm -rf node_modules && npm install
+npm update firebase @google/generative-ai
 
 
 
@@ -157,16 +183,20 @@ BuildWise/
 
 
 ## 🤝 Contributing
-Fork the repo.
 
-Create a new branch (git checkout -b feature/new-feature).
+1. **Fork the repo**  
+2. **Create branch**: `git checkout -b feature/your-feature`  
+3. **Commit changes**: `git commit -m "Add feature"`  
+4. **Push**: `git push origin feature/your-feature`  
+5. **Open Pull Request** on GitHub  
 
-Commit changes (git commit -m "Add new feature").
+📌 **Requirements**:  
+- Document your code changes  
+- Ensure no console logs remain  
+- Test changes thoroughly  
+- Follow existing code style  
 
-Push to branch (git push origin feature/new-feature).
-
-Open a Pull Request.
-
+🔧 **Need help?** Open an issue!
 
 
 

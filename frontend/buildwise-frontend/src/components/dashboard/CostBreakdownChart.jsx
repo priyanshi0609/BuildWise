@@ -31,6 +31,7 @@ export default function CostBreakdownChart({ projects = [] }) {
       },
     ],
   };
+  //console.log('Projects data:', projects);
 
   return (
     <div className="h-80">

@@ -132,7 +132,9 @@ export default function Home() {
             transition={{ duration: 0.5, delay: 0.6 }}
             className="mt-10 flex gap-4"
           >
-            <button className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full px-8 py-4 text-lg font-semibold shadow-lg transition-all hover:shadow-xl hover:scale-105 flex items-center">
+            <button 
+              onClick={() => navigate('/dashboard')}
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full px-8 py-4 text-lg font-semibold shadow-lg transition-all hover:shadow-xl hover:scale-105 flex items-center">
               Get Started <ArrowRight className="ml-2 h-5 w-5" />
             </button>
             <button className="border-2 border-blue-600 text-blue-600 hover:bg-blue-50 rounded-full px-8 py-4 text-lg font-semibold transition-all hover:shadow-md">

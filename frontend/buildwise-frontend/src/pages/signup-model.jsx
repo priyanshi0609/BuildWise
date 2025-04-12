@@ -4,6 +4,7 @@ import { X, Mail, Lock, User, Eye, EyeOff } from "lucide-react";
 import { createUserWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { auth, provider, db } from "/src/firebase.js";
+import { useNavigate } from "react-router-dom";
 
 export default function SignupModal({ isOpen, onClose, onOpenLogin }) {
   const [email, setEmail] = useState("");
@@ -12,6 +13,7 @@ export default function SignupModal({ isOpen, onClose, onOpenLogin }) {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(false);
+  const navigate = useNavigate();
 
   // Prevent body scrolling when modal is open
   useEffect(() => {
@@ -53,6 +55,7 @@ export default function SignupModal({ isOpen, onClose, onOpenLogin }) {
       await storeUserInFirestore(result.user, "email");
       alert(`Account created for ${result.user.email}`);
       onClose();
+      navigate("/dashboard"); // Redirect to dashboard after sign-up
     } catch (error) {
       console.error("Sign-Up Error:", error.message);
       alert("Sign-Up failed: " + error.message);
@@ -66,6 +69,7 @@ export default function SignupModal({ isOpen, onClose, onOpenLogin }) {
       await storeUserInFirestore(user, "google");
       alert(`Welcome ${user.displayName}`);
       onClose();
+      navigate("/dashboard"); // Redirect to dashboard after sign-up
     } catch (error) {
       console.error("Google Sign-Up Error:", error);
       alert("Google Sign-Up failed. Please try again.");

@@ -66,18 +66,18 @@
 
 ---
 
+## Installation Commands (to run locally)
+
+###  Clone the repository
 
 
-## 🌐 API Reference
 
-| Endpoint            | Method | Description                       |
-|---------------------|--------|-----------------------------------|
-| `/api/estimate`     | POST   | Calculate project cost using Gemini API |
-| `/api/optimize`     | POST   | Get optimization suggestions using Gemini API |
-| `/api/report`       | POST   | Generate and download PDF report  |
-| `/api/auth/login`   | POST   | User authentication via Firebase API |
 
----
+
+
+
+
+
 
 ## 🗂️ Folder Structure
 

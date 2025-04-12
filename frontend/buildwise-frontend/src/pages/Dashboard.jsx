@@ -163,7 +163,7 @@ export default function Dashboard() {
             </div>
             <button 
               className="bg-white text-blue-600 hover:bg-blue-50 px-4 py-2 rounded-lg flex items-center font-medium shadow-sm transition-all hover:shadow focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50"
-              onClick={() => navigate('/estimate/new')}
+              onClick={() => navigate('/new-project')}
             >
               <PlusCircle className="h-5 w-5 mr-2" />
               New Project

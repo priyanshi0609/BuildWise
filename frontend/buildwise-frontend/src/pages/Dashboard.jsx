@@ -15,7 +15,7 @@ import {
 import ProjectCard from '../components/dashboard/ProjectCard';
 import CostBreakdownChart from '../components/dashboard/CostBreakdownChart';
 import RecentActivity from '../components/dashboard/RecentActivity';
-import Optimization from '../components/dashboard/Optimize';
+// import Optimization from '../components/dashboard/Optimize';
 import { useAuth } from '../Authcontext';
 import { getProjects } from '../services/api';
 
@@ -172,7 +172,7 @@ export default function Dashboard() {
         {/* Tabs for Projects, Analytics, Reports, Optimization */}
         <div className="border-b border-gray-200 mb-6">
           <nav className="-mb-px flex space-x-8">
-            {['projects', 'analytics', 'reports', 'optimization'].map(tab => (
+            {['projects', 'analytics', 'reports'].map(tab => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}

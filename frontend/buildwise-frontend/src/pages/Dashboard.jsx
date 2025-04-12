@@ -78,7 +78,7 @@ export default function Dashboard() {
           <h2 className="text-xl font-semibold mb-4">Authentication Required</h2>
           <p className="mb-4">Please log in to access the dashboard</p>
           <button 
-            onClick={() => navigate('/login')}
+            onClick={() => navigate('/login-model')}
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
           >
             Go to Login
@@ -219,7 +219,7 @@ export default function Dashboard() {
                   <h3 className="text-lg font-medium text-gray-900 mb-2">No projects yet</h3>
                   <p className="text-gray-500 mb-6">Get started by creating your first project</p>
                   <button
-                    onClick={() => navigate('/estimate/new')}
+                    onClick={() => navigate('/new-project')}
                     className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center mx-auto"
                   >
                     <PlusCircle className="h-5 w-5 mr-2" />

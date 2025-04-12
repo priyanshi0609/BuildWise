@@ -78,7 +78,7 @@ export default function Dashboard() {
           <h2 className="text-xl font-semibold mb-4">Authentication Required</h2>
           <p className="mb-4">Please log in to access the dashboard</p>
           <button
-            onClick={() => navigate('/login-model')}
+            onClick={() => navigate('/')}
             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
           >
             Go to Login

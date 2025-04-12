@@ -60,17 +60,17 @@ export default function RecentActivity({ userId }) {
     );
   }
 
-  if (error) {
-    return (
-      <div className="p-4 bg-red-50 text-red-700 rounded-md flex items-start gap-2">
-        <AlertCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
-        <div>
-          <p className="font-medium">Error loading activity</p>
-          <p className="text-sm">{error}</p>
-        </div>
-      </div>
-    );
-  }
+//   if (error) {
+//     return (
+//       <div className="p-4 bg-red-50 text-red-700 rounded-md flex items-start gap-2">
+//         <AlertCircle className="h-5 w-5 mt-0.5 flex-shrink-0" />
+//         <div>
+//           <p className="font-medium">Error loading activity</p>
+//           {/* <p className="text-sm">{error}</p> */}
+//         </div>
+//       </div>
+//     );
+//   }
 
   if (!activities || activities.length === 0) {
     return (

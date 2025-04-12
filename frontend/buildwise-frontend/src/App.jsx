@@ -6,6 +6,7 @@ import { AuthProvider } from './Authcontext';
 import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
 import NewProjectPage from './pages/NewProjectPage';
+import Settings from './pages/Settings';
 import ProjectDetail from './pages/ProjectDetail';
 import EditProjectPage from './pages/EditProjectPage';
 import ReportPage from './pages/ReportPage';
@@ -29,6 +30,7 @@ const App = () => {
           <Route path="/projects/:id/edit" element={<EditProjectPage />} />
           <Route path="/projects/:id/report" element={<ReportPage />} />
           <Route path="/projects/:id/optimize" element={<Optimize />} />
+          <Route path="/settings" element={<Settings />} />
           
           {/* 404 Not Found */}
           <Route path="*" element={<NotFound />} />

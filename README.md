@@ -56,11 +56,11 @@
 
 | Layer         | Technology                            | Purpose                          |
 |---------------|----------------------------------------|----------------------------------|
-| **Frontend**  | React 18, Vite, JavaScript             | Core UI Framework                |
+| **Frontend**  | React JS, Vite, JavaScript             | Core UI Framework                |
 | **Styling**   | TailwindCSS, Framer Motion             | Responsive UI & Animations       |
-| **Backend**   | Node.js, Express, Firebase Functions   | API Services & Logic             |
-| **Database**  | Firestore, MongoDB Atlas               | Persistent & Analytical Storage  |
-| **AI/ML**     | Python, scikit-learn, TensorFlow.js    | Predictive Cost Modeling         |
+| **Backend**   |  Firebase Functions                    | API Services & Logic             |
+| **Database**  | Firestore                              | Persistent & Analytical Storage  |
+| **AI/ML**     | Gemini API                             | Predictive Cost Modeling         |
 | **DevOps**    | GitHub Actions, Docker                 | CI/CD & Deployment               |
 | **Monitoring**| Sentry, Prometheus                     | Error Tracking & Performance     |
 

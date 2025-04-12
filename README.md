@@ -107,9 +107,9 @@ BuildWise/
 │   ├── src/
 │   │   ├── components/
 │   │   │   ├── Auth/
-│   │   │   │   ├── login-model.jsx     # Renamed to LoginForm.jsx
-│   │   │   │   └── signup-model.jsx    # Renamed to SignupForm.jsx
-│   │   │   ├── Dashboard/
+│   │   │   │   ├── login-model.jsx     
+│   │   │   │   └── signup-model.jsx    
+│   │   │   ├── Dashboard/             # Charts, CostSummary
 │   │   │   │   ├── CostBreakdownChart.jsx
 │   │   │   │   ├── ProjectCard.jsx
 │   │   │   │   └── RecentActivity.jsx
@@ -125,10 +125,10 @@ BuildWise/
 │   │   │   ├── EditProjectPage.jsx
 │   │   │   ├── Estimate.jsx
 │   │   │   ├── History.jsx
-│   │   │   ├── Home.jsx
+│   │   │   ├── Home.jsx       # Landing page
 │   │   │   ├── NewProjectPage.jsx
 │   │   │   ├── NotFound.jsx
-│   │   │   ├── Optimize.jsx
+│   │   │   ├── Optimize.jsx          # Suggestions, Comparison
 │   │   │   ├── ProjectDetail.jsx
 │   │   │   ├── ReportPage.jsx
 │   │   │   └── Settings.jsx

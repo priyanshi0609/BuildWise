@@ -15,7 +15,6 @@ export default function SignupModal({ isOpen, onClose, onOpenLogin }) {
   const [agreeTerms, setAgreeTerms] = useState(false);
   const navigate = useNavigate();
 
-  // Prevent body scrolling when modal is open
   useEffect(() => {
     document.body.style.overflow = isOpen ? "hidden" : "unset";
     return () => {
@@ -44,7 +43,6 @@ export default function SignupModal({ isOpen, onClose, onOpenLogin }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Simple check for passwords match
     if (password !== confirmPassword) {
       alert("Passwords do not match!");
       return;
@@ -55,7 +53,7 @@ export default function SignupModal({ isOpen, onClose, onOpenLogin }) {
       await storeUserInFirestore(result.user, "email");
       alert(`Account created for ${result.user.email}`);
       onClose();
-      navigate("/dashboard"); // Redirect to dashboard after sign-up
+      navigate("/dashboard");
     } catch (error) {
       console.error("Sign-Up Error:", error.message);
       alert("Sign-Up failed: " + error.message);
@@ -69,7 +67,7 @@ export default function SignupModal({ isOpen, onClose, onOpenLogin }) {
       await storeUserInFirestore(user, "google");
       alert(`Welcome ${user.displayName}`);
       onClose();
-      navigate("/dashboard"); // Redirect to dashboard after sign-up
+      navigate("/dashboard");
     } catch (error) {
       console.error("Google Sign-Up Error:", error);
       alert("Google Sign-Up failed. Please try again.");
@@ -246,7 +244,6 @@ export default function SignupModal({ isOpen, onClose, onOpenLogin }) {
                 </div>
               </form>
 
-              {/* Google Sign-Up Option */}
               <div className="relative text-center mt-6">
                 <p className="text-sm text-gray-500 mb-2">or</p>
                 <button

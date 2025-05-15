@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@arshtiwari/envguard": "^1.0.8",
     "@google/generative-ai": "^0.24.0",
     "@react-pdf/renderer": "^4.3.0",
     "@tailwindcss/vite": "^4.1.3",

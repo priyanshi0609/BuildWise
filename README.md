@@ -52,6 +52,41 @@
 
 ---
 
+
+## 🔄 Workflow Overview
+
+#### 1. User Authentication 
+
+Sign-up → Email verification / Google Auth → Login
+
+#### 2. Project Input
+
+Form submission → Data validation → Cost calculation
+
+#### 3. Dashboard
+
+Real-time cost breakdown → Interactive visualization
+
+#### 4. Optimization
+
+Gemini API analysis → Alternative suggestions → Cost comparison
+
+#### 5. Report Generation
+
+PDF compilation → Download/Save to history
+
+
+
+
+
+
+
+
+
+
+
+
+
 ## 🛠️ Tech Stack
 
 | Layer         | Technology                            | Purpose                          |
@@ -66,18 +101,57 @@
 
 ---
 
+## Installation Commands (to run locally)
+
+####  Clone repository
+
+```bash
+git clone https://github.com/priyanshi0609/BuildWise
+```
+
+#### Install frontend dependencies
+
+```bash
+cd buildwise
+cd frontend
+cd buildwise-frontend
+npm install
+```
+
+#### 🔐 Environment Setup
+
+```bash
+# Add these to your .env file (frontend)
+ 'FIREBASE_API_KEY=your-key' >> .env
+ 'FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com' >> .env
+ 'FIREBASE_PROJECT_ID=your-project-id' >> .env
+ 'VITE_GEMINI_API_KEY=your-gemini-key' >> .env
+```
+
+#### run the project
+```bash
+npm run dev
+```
 
 
-## 🌐 API Reference
+## 🔥 Firebase Setup
+1. Enable Authentication (Email/Google)
+2. Create Firestore database in test mode
+3. Add your web app config to .env
 
-| Endpoint            | Method | Description                       |
-|---------------------|--------|-----------------------------------|
-| `/api/estimate`     | POST   | Calculate project cost using Gemini API |
-| `/api/optimize`     | POST   | Get optimization suggestions using Gemini API |
-| `/api/report`       | POST   | Generate and download PDF report  |
-| `/api/auth/login`   | POST   | User authentication via Firebase API |
+## 🤖 Gemini API Notes
+- Used in Optimize.jsx components
+- Rate limit: 60 RPM (adjust in code if needed)
+- Store API keys ONLY in .env
 
----
+## 🚨 Troubleshooting
+# Common issues fix:
+rm -rf node_modules && npm install
+npm update firebase @google/generative-ai
+
+
+
+
 
 ## 🗂️ Folder Structure
 
@@ -144,16 +218,20 @@ BuildWise/
 
 
 ## 🤝 Contributing
-Fork the repo.
 
-Create a new branch (git checkout -b feature/new-feature).
+1. **Fork the repo**  
+2. **Create branch**: `git checkout -b feature/your-feature`  
+3. **Commit changes**: `git commit -m "Add feature"`  
+4. **Push**: `git push origin feature/your-feature`  
+5. **Open Pull Request** on GitHub  
 
-Commit changes (git commit -m "Add new feature").
+📌 **Requirements**:  
+- Document your code changes  
+- Ensure no console logs remain  
+- Test changes thoroughly  
+- Follow existing code style  
 
-Push to branch (git push origin feature/new-feature).
-
-Open a Pull Request.
-
+🔧 **Need help?** Open an issue!
 
 
 
